@@ -1,0 +1,7 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://github.com/ParkMin-woo/MySpring01.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
