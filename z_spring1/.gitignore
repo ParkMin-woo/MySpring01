@@ -119,4 +119,19 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.restore
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/
+
+### STS / Spring ###
+.classpath
+.project
+
 # End of https://www.toptal.com/developers/gitignore/api/windows,eclipse,java

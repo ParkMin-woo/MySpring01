@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<!-- mapper 태그 선언 -->
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<!-- namespace 속성값으로 [DAO 인터페이스명]이 오며
+	[DAO 인터페이스] 메소드명과 동일한 id값을 소유한 태그를 내포하고 있다. -->
+<mapper namespace="com.spring.ex01.BoardDAO">
+
+	<!-- 게시판 검색 총 행의 개수를 검색하는 select문을 내포한 select 태그를 선언 -->
+	<select id="getBoardList" parameterType="com.spring.ex01.BoardSearchDTO" resultType="java.util.HashMap">
+		<![CDATA[
+			select
+				@rownum := @rownum + 1 as rownum                                                       
+				, a.b_no as bNo                                                                               
+				, a.writer                                                                             
+				, a.email
+				, case a.print_level                                                                   
+					when 0 then a.subject                                                              
+					when 1 then concat('&nbsp;&nbsp;└', a.subject)                                     
+					when 2 then concat('&nbsp;&nbsp;&nbsp;&nbsp;└', a.subject)                         
+					when 3 then concat('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└', a.subject)             
+					when 4 then concat('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└', a.subject)
+				end as subject                                                                         
+				, a.hit                                                                                
+				, DATE_FORMAT(a.regist_date, '%Y-%m-%d %H:%i:%s') as registDate
+				, DATE_FORMAT(a.modify_date, '%Y-%m-%d %H:%i:%s') as modifyDate
+				, a.content
+				, a.b_password as bPassword
+				, a.group_no as groupNo
+				, a.print_no as printNo
+				, a.print_level as printLevel
+			from test_db.t_board a, (select @rownum := 0) as r
+			where 1=1
+		]]>
+		<!-- ************************************************* -->
+		<!-- [게시판 개수] 검색 시 사용할 where절 선언. -->
+		<!-- ************************************************* -->
+		<!-- 만약 BoardSearchDTO 객체 안의 keyword 속성변수가 비어있지 않으면, 즉 키워드가 있으면 -->
+		<if test = "keyword != null and keyword != ''">
+			<!-- 만약 BoardSearchDTO 객체 안의 keywordContent 속성변수가 "all"이면 -->
+			<if test = "keywordContent == 'all'">
+				and (
+					a.group_no = any( select group_no from test_db.t_board where upper(subject) like upper( '%${keyword}%') )
+					or a.group_no = any( select group_no from test_db.t_board where upper(content) like upper( '%${keyword}%') )
+					or a.group_no = any( select group_no from test_db.t_board where upper(writer) like upper( '%${keyword}%') )
+					or a.group_no = any( select group_no from test_db.t_board where upper(email) like upper( '%${keyword}%') )
+				)
+			</if>
+			<!-- 만약 BoardSearchDTO 객체 안의 keywordContent 속성변수가 "subject"이면 -->	
+			<if test = "keywordContent == 'subject'">
+				and a.group_no = any( select group_no from test_db.t_board where upper(subject) like upper( '%${keyword}%') )
+			</if>
+			<!-- 만약 BoardSearchDTO 객체 안의 keywordContent 속성변수가 "content"이면 -->
+			<if test = "keywordContent == 'content'">
+				and a.group_no = any( select group_no from test_db.t_board where upper(content) like upper( '%${keyword}%') )
+			</if>
+			<!-- 만약 BoardSearchDTO 객체 안의 keywordContent 속성변수가 "writer"이면 -->
+			<if test = "keywordContent == 'writer'">
+				and a.group_no = any( select group_no from test_db.t_board where upper(writer) like upper( '%${keyword}%') )
+			</if>
+		</if>
+		order by a.group_no desc, a.print_no asc
+		limit ${rowCntPerPage*selectPageNo - rowCntPerPage} , ${rowCntPerPage}
+	</select>
+	
+	<!-- ************************************************* -->
+	<!-- 게시판 검색 총 행의 개수를 검색하는 select문을 내포한 select 태그를 선언 -->
+	<!-- ************************************************* -->
+	<select id="getBoardListCnt" parameterType="com.spring.ex01.BoardSearchDTO" resultType="int">
+		select
+			count(*)
+		from test_db.t_board a
+		where 1=1
+		<!-- ************************************************* -->
+		<!-- [게시판 개수] 검색 시 사용할 where절 선언. -->
+		<!-- ************************************************* -->
+		<!-- 만약 BoardSearchDTO 객체 안의 keyword 속성변수가 비어있지 않으면, 즉 키워드가 있으면 -->
+		<if test = "keyword != null and keyword != ''">
+			<!-- 만약 BoardSearchDTO 객체 안의 keywordContent 속성변수가 "all"이면 -->
+			<if test = "keywordContent == 'all'">
+				and (
+					a.group_no = any( select group_no from test_db.t_board where upper(subject) like upper( '%${keyword}%') )
+					or a.group_no = any( select group_no from test_db.t_board where upper(content) like upper( '%${keyword}%') )
+					or a.group_no = any( select group_no from test_db.t_board where upper(writer) like upper( '%${keyword}%') )
+					or a.group_no = any( select group_no from test_db.t_board where upper(email) like upper( '%${keyword}%') )
+				)
+			</if>
+			<!-- 만약 BoardSearchDTO 객체 안의 keywordContent 속성변수가 "subject"이면 -->	
+			<if test = "keywordContent == 'subject'">
+				and a.group_no = any( select group_no from test_db.t_board where upper(subject) like upper( '%${keyword}%') )
+			</if>
+			<!-- 만약 BoardSearchDTO 객체 안의 keywordContent 속성변수가 "content"이면 -->
+			<if test = "keywordContent == 'content'">
+				and a.group_no = any( select group_no from test_db.t_board where upper(content) like upper( '%${keyword}%') )
+			</if>
+			<!-- 만약 BoardSearchDTO 객체 안의 keywordContent 속성변수가 "writer"이면 -->
+			<if test = "keywordContent == 'writer'">
+				and a.group_no = any( select group_no from test_db.t_board where upper(writer) like upper( '%${keyword}%') )
+			</if>
+		</if>
+		order by a.group_no desc, a.print_no asc
+	</select>
+	
+	<update id="updateBoardPrintUpCnt" parameterType="com.spring.ex01.BoardDTO">
+		update test_db.t_board     
+		set                        
+			print_no = print_no + 1
+		where 1=1                  
+		and group_no = (           
+			select                 
+				group_no           
+			from test_db.t_board   
+			where 1=1              
+			and b_no = #{bNo}
+		)                          
+		and print_no > (           
+			select                 
+				print_no           
+			from test_db.t_board   
+			where 1=1              
+			and b_no = #{bNo}
+		)
+	</update>
+	
+	<insert id="insertBoardRegReplyCnt" parameterType="com.spring.ex01.BoardDTO">
+		insert into test_db.t_board(                
+			b_no                                    
+			, subject                               
+			, writer                                
+			, email                                 
+			, content                               
+			, b_password                            
+			, modify_date                           
+			, group_no                              
+			, print_no                              
+			, print_level                           
+		) values(                                   
+		   (                                        
+		      select                                
+		         z.b_no                             
+		      from (                                
+		         select                             
+		            ifnull(max(b_no), 0) + 1 as b_no
+		         from test_db.t_board               
+		      ) z                                   
+		   )                                        
+		   , #{subject}
+		   , #{writer}                                      
+		   , #{email}                                      
+		   , #{content}
+		   , #{bPassword}
+		   , CURRENT_TIMESTAMP(3)
+		   <if test = "bNo == 0">
+			   , (                                      
+			      select                                
+			         z.b_no                             
+			      from (                                
+			         select                             
+			            ifnull(max(b_no), 0) + 1 as b_no
+			         from test_db.t_board               
+			      ) z                                   
+			   )                                        
+			   , 0                                      
+			   , 0
+		   </if>
+		   <if test = "bNo != 0">
+			   , (                                   
+			      select                             
+			         group_no                        
+			      from test_db.t_board               
+			      where 1=1                          
+			      and b_no = #{bNo}
+			   )                                     
+			   , (                                   
+			      select                             
+			         print_no + 1                    
+			      from test_db.t_board               
+			      where 1=1                          
+			      and b_no = #{bNo}
+			   )                                     
+			   , (                                   
+			      select                             
+			         print_level + 1                 
+			      from test_db.t_board               
+			      where 1=1                          
+			      and b_no = #{bNo}
+			   )
+		   </if>
+		   )
+	</insert>
+	
+	<update id="updateBoardHit" parameterType="int">
+		update test_db.t_board
+		set
+			hit = hit + 1
+		where 1=1
+		and b_no = #{bNo}
+	</update>
+	
+	<select id="getBoard" parameterType="int" resultType="com.spring.ex01.BoardDTO">
+		select
+			a.b_no as bNo
+			, a.subject
+			, a.writer
+			, a.email
+			, a.hit
+			, a.regist_date as registDate
+			, a.modify_date as modifyDate
+			, a.content
+			, a.b_password as bPassword
+			, a.group_no as groupNo
+			, a.print_no as printNo
+			, a.print_level as printLevel
+		from test_db.t_board a
+		where 1=1
+		and b_no = #{bNo}
+	</select>
+	
+	<select id="getSonBoardCnt" parameterType="int" resultType="int">
+		select
+			count(*)
+		from test_db.t_board    
+		where 1=1               
+		and group_no = (        
+			select              
+				group_no        
+			from test_db.t_board
+			where 1=1           
+			and b_no = #{bNo}
+		)                       
+		and print_no = (        
+			select              
+				print_no + 1    
+			from test_db.t_board
+			where 1=1
+			and b_no = #{bNo}
+		)
+		and print_level = (     
+			select              
+				print_level + 1 
+			from test_db.t_board
+			where 1=1           
+			and b_no = #{bNo}
+		)
+	</select>
+	
+	<update id="updateBoard" parameterType="com.spring.ex01.BoardDTO">
+		update test_db.t_board                  
+		set                                     
+			subject = #{subject}
+			, email = #{email}
+			, content = #{content}
+			, modify_date = CURRENT_TIMESTAMP(3)
+		where 1=1                               
+		and b_no = #{bNo}
+		and b_password = #{bPassword}
+	</update>
+	
+	<delete id="deleteBoard" parameterType="com.spring.ex01.BoardDTO">
+		delete from test_db.t_board
+		where 1=1
+		and b_no = #{bNo}
+		and b_password = #{bPassword}
+	</delete>
+
+</mapper>
