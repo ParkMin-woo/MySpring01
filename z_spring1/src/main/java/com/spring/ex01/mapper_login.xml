@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.ex01.LoginDAO">
+	<!-- **************************************************************** -->
+	<!-- [로그인 아이디, 암호 존재 개수]를 검색하는 select 문을 내포한 <select> 태그 선언 -->
+	<!-- **************************************************************** -->
+		<!-- <select> 태그 속성 설명 -->
+			<!-- id="getAdminCnt"			=> SQL 구문의 고유 아이디값 설정. DAO 클래스의 메소드 이름과 동일함 -->
+			<!-- parameterType="hashmap"	=> SQL 구문에 삽입될 외부 데이터의 자료형 설정 -->
+			<!-- resultType="int"			=> SQL 구문의 실행 후 리턴값 자료형 설정 -->
+	<!-- **************************************************************** -->
+	<select id="getLoginIdCnt" parameterType="hashmap" resultType="int">
+		select
+			count(*)
+		from test_db.t_member2
+		where id = #{loginId}
+		and password = #{pwd}
+	</select>
+
+</mapper>
